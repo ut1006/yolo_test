@@ -10,17 +10,17 @@ left_image_rect = None
 bridge = CvBridge()
 
 # Output directory setup
-output_dir = "output"
+output_dir = "datasets/1112_2"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# Function to get the next sequential directory number
+# Function to get the next sequential filename
 def get_next_filename_count(directory):
-    files = glob(os.path.join(directory, "*"))
+    files = glob(os.path.join(directory, "*.png"))
     if not files:
         return 1  # Start numbering from 1
-    latest_dir = max(files, key=lambda x: int(os.path.basename(x)))
-    latest_num = int(os.path.basename(latest_dir))
+    latest_file = max(files, key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
+    latest_num = int(os.path.splitext(os.path.basename(latest_file))[0])
     return latest_num + 1
 
 # Callback function for the left camera rectified image
@@ -32,13 +32,11 @@ def left_image_rect_callback(msg):
 def save_left_image(event):
     global left_image_rect
     if left_image_rect is not None:
-        # Create a new sequential directory
+        # Get the next sequential filename
         count = get_next_filename_count(output_dir)
-        dir_name = os.path.join(output_dir, f"{count:04d}")
-        os.makedirs(dir_name)
+        left_rect_filename = os.path.join(output_dir, f"{count:04d}.png")
 
-        # Create filename for the left image and save it
-        left_rect_filename = os.path.join(dir_name, f"l{count:04d}.png")
+        # Save the image
         cv2.imwrite(left_rect_filename, left_image_rect)
         
         print(f"Saved {left_rect_filename}")
